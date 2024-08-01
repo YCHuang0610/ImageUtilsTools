@@ -78,7 +78,7 @@ def Plot_MySurf_RegionWise(
     size=(500, 400),
     layout="grid",
     views=None,
-    brightness=5
+    brightness=0.5
 ):
     """
     Plot a surface region-wise.
@@ -128,7 +128,7 @@ def Plot_MySurf_RegionWise_OneHemi(
     size=(500, 400),
     layout="grid",
     views=None,
-    brightness=5
+    brightness=0.5
 ):
     array_single_hemi = np.array(array_single_hemi)
     map_array = map_array_to_label(array_single_hemi, parc)
