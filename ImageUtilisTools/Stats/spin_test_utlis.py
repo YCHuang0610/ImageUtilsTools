@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+import pandas as pd
 from neuromaps import images, nulls
 from brainsmash.mapgen.base import Base
 
@@ -31,7 +32,8 @@ def generate_spin_permutation(
     Returns:
     - perm_imaging (numpy.ndarray): The generated spin permutations of the imaging data.
     """
-
+    if isinstance(data, pd.Series):
+        data = data.values
     data = np.squeeze(data)
     parcellation = images.relabel_gifti(parcellationLR)
 
