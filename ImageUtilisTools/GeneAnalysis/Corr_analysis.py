@@ -20,7 +20,7 @@ import pandas as pd
 from scipy.stats import zscore
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
-from Stats.spin_test_utlis import generate_spin_permutation
+from ..Stats.spin_test_utlis import generate_spin_permutation
 
 
 @numba.njit

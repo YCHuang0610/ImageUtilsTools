@@ -21,7 +21,7 @@ from neuromaps import stats
 from pyls import pls_regression
 from tqdm import tqdm
 from scipy.stats import zscore, pearsonr, spearmanr
-from Stats.spin_test_utlis import generate_spin_permutation
+from ..Stats.spin_test_utlis import generate_spin_permutation
 
 
 def correlation(c1, c2):

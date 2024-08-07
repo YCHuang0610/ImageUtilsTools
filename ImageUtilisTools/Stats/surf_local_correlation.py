@@ -1,6 +1,6 @@
 import nibabel as nib
 import numpy as np
-from GeneAnalysis.Corr_analysis import rank_array
+from ..GeneAnalysis.Corr_analysis import rank_array
 import numba
 
 @numba.njit
@@ -11,7 +11,6 @@ def spearman_r(x, y):
     return corr
 
 
-@numba.njit(parallel=True)
 def local_corr(x, y, coor, a, method="spearmanr"):
     """
     Calculate the local correlation between two arrays.
@@ -29,7 +28,7 @@ def local_corr(x, y, coor, a, method="spearmanr"):
     v = coor / np.sqrt((coor ** 2).sum(axis=1))[:, np.newaxis]
     r = np.zeros(v.shape[0])
     # no values
-    vals = np.logical_and(x != 0, y != 0)
+    vals = np.logical_and(np.logical_and(x != 0, ~np.isnan(x)), np.logical_and(y != 0, ~np.isnan(y)))
 
     for i in numba.prange(v.shape[0]):
         cos_angle = v @ v[i]
@@ -71,6 +70,7 @@ def surflocalcorr(x, y, sph, a=30, method='spearmanr', return_gifti=False):
     if isinstance(sph, str):
         sph = nib.load(sph)
     coordinates, _ = sph.agg_data()
+    assert method in ["pearsonr", "spearmanr"], "Invalid method. Must be 'pearsonr' or 'spearmanr'."
     corr = local_corr(x, y, coordinates, a, method)
     # 保存到Gifti对象
     if return_gifti:
