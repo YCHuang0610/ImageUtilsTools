@@ -2,6 +2,7 @@ import nibabel as nib
 
 from surfplot import Plot
 import numpy as np
+import pandas as pd
 
 
 def map_array_to_label(array, label):
@@ -19,6 +20,8 @@ def map_array_to_label(array, label):
     AssertionError: If the length of the array is not equal to the number of region labels.
 
     """
+    if isinstance(array_LR, pd.Series):
+        array_LR = array_LR.values
     if isinstance(label, str):
         label = nib.load(label).agg_data()
     else:
@@ -63,6 +66,35 @@ def map_array_LR_to_label(array_LR, lh_parc, rh_parc):
     map_array_L = map_array_to_label(array_L, lh_parc)
     map_array_R = map_array_to_label(array_R, rh_parc)
     return map_array_L, map_array_R
+
+
+def Plot_MySurf_VertexWise(
+    left_data,
+    right_data,
+    lh,
+    rh,
+    cmap="viridis",
+    color_range=None,
+    cbar=True,
+    title=None,
+    size=(500, 400),
+    layout="grid",
+    views=None,
+):
+    p = Plot(lh, rh, size=size, layout=layout, views=views, mirror_views=True)
+    if color_range is not None:
+        p.add_layer(
+            {"left": left_data, "right": right_data},
+            cbar=cbar,
+            cmap=cmap,
+            color_range=color_range,
+        )
+    else:
+        p.add_layer({"left": left_data, "right": right_data}, cbar=cbar, cmap=cmap)
+    figure = p.build()
+    if title is not None:
+        figure.axes[0].set_title(title)
+    return figure
 
 
 def Plot_MySurf_RegionWise(
