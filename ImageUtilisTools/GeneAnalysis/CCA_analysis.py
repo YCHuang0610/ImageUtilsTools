@@ -52,7 +52,7 @@ class CCA_permutation:
             assert parcellationLR is not None, "parcellationLR is required"
             self.use_spin_test = True
             self.y_perm = generate_spin_permutation(
-                self.Y,
+                self.y,
                 parcellationLR,
                 atlas=atlas,
                 density=density,
@@ -86,7 +86,7 @@ class CCA_permutation:
                 _, r_perm, _ = CCA_function_align_weights(self.X, y_permutation)
                 r_perm_list[i] = r_perm
 
-            p = (r_perm_list > self.r).sum() / self.perm
+        p = (r_perm_list > self.r).sum() / self.perm
 
         print(f"p-value of CCA: {p}")
         return p
@@ -103,16 +103,16 @@ class CCA_permutation:
             _, _, x_weight = CCA_function_align_weights(X_boot, y_boot)
             weight_perm[i, :] = x_weight.flatten()
 
-            std = np.std(weight_perm, axis=0)
+        std = np.std(weight_perm, axis=0)
 
-            temp_w = self.weights / std
+        temp_w = self.weights.flatten() / std
 
-            Z = np.sort(temp_w)[::-1]
-            ind = np.argsort(temp_w)[::-1]
-            gene_list = self.x_label[ind]
+        Z = np.sort(temp_w)[::-1]
+        ind = np.argsort(temp_w)[::-1]
+        gene_list = self.x_label[ind]
 
-            df = pd.DataFrame({"Gene": gene_list, "Z-score": Z})
-            return df
+        df = pd.DataFrame({"Gene": gene_list, "Z-score": Z})
+        return df
 
 
 
