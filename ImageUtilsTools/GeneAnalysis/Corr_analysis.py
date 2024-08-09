@@ -5,8 +5,6 @@ Date: [26/07/2024]
 This module contains functions and classes for performing correlation analysis between gene expression data and imaging data.
 
 Functions:
-- rank_array(array): Ranks the elements in an array.
-- spearman_opt(imaging, genes): Calculates the Spearman rank correlation between two arrays.
 - compute_spearman_pval(corr, boot_corr): Computes the p-values and their FDR correction for the correlation.
 
 Classes:
@@ -14,7 +12,6 @@ Classes:
 
 """
 
-import numba
 import numpy as np
 import pandas as pd
 from scipy.stats import zscore

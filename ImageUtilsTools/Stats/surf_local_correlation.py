@@ -1,3 +1,15 @@
+"""
+This module provides functions for calculating local correlation between two surface between two input.
+
+Reference:
+- https://github.com/elifesciences-publications/project_msm/blob/master/scripts/surflocalcorr.m
+- Eichert N, Robinson EC, Bryant KL, Jbabdi S, Jenkinson M, Li L, Krug K, Watkins KE & Mars R. 2020. Cross-species cortical alignment identifies different types of anatomical reorganization in the primate temporal lobe. eLife https://doi.org/10.7554/eLife.53232
+
+Functions:
+- local_corr(x, y, coor, a, method="spearmanr"): Calculate the local correlation.
+- surflocalcorr(x, y, sph, a=30, method="spearmanr", return_gifti=False): Calculate the surface local correlation between two input.
+"""
+
 import nibabel as nib
 import numpy as np
 from ..utils._spearman import spearman_r

@@ -1,3 +1,17 @@
+"""
+Author: [Yichun Huang]
+Date: [09/08/2024]
+
+This module contains functions and classes for performing Canonical Correlation Analysis (CCA) and permutation analysis.
+
+Functions:
+    CCA_function_align_weights: Aligns the independent variable data and calculates the canonical correlation coefficient and weights.
+    
+Classes:
+    CCA_permutation: Performs CCA permutation analysis and computes p-values and Z-scores of the weights.
+
+"""
+
 import numpy as np
 import pandas as pd
 from scipy.stats import zscore
@@ -22,6 +36,38 @@ def CCA_function_align_weights(X, y):
 
 
 class CCA_permutation:
+    """
+    Class for performing CCA (Canonical Correlation Analysis) permutation analysis.
+
+    Args:
+        X (array-like): The independent variable data matrix.
+        y (array-like): The dependent variable data matrix.
+        x_label (array-like): Labels for the independent variables.
+        spin_test_method (str, optional): The spin test method to use for permutation. Defaults to None.
+        parcellationLR (array-like, optional): The parcellation data for spin permutation. Required if `spin_test_method` is not None. Defaults to None.
+        atlas (str, optional): The atlas used for spin permutation. Defaults to "fsLR".
+        density (str, optional): The density used for spin permutation. Defaults to "32k".
+        perm (int, optional): The number of permutations to perform. Defaults to 1000.
+        seed (int, optional): The random seed for reproducibility. Defaults to 1234.
+        **kwargs: Additional keyword arguments to be passed to the spin permutation function.
+
+    Attributes:
+        X (array-like): The z-scored independent variable data matrix.
+        y (array-like): The z-scored dependent variable data matrix.
+        x_label (array-like): Labels for the independent variables.
+        n_regions (int): The number of regions in the independent variable data.
+        n_features (int): The number of features in the independent variable data.
+        perm (int): The number of permutations to perform.
+        seed (int): The random seed for reproducibility.
+        X_c (array-like): The aligned independent variable data after CCA.
+        r (float): The canonical correlation coefficient.
+        weights (array-like): The weights of the independent variables in the CCA.
+        negative (bool): Flag indicating if the correlation is negative.
+        use_spin_test (bool): Flag indicating if spin permutation is used.
+        y_perm (array-like): The permuted dependent variable data for spin permutation.
+
+    """
+
     def __init__(
         self,
         X,
@@ -45,10 +91,12 @@ class CCA_permutation:
         self.seed = seed
 
         # run the first CCA
-        self.X_c, self.r, self.weights, self.negative = CCA_function_align_weights(self.X, self.y)
+        self.X_c, self.r, self.weights, self.negative = CCA_function_align_weights(
+            self.X, self.y
+        )
         if self.negative:
             print("Negative correlation,")
-            print(f"anonical Correlation Coefficient: {-self.r}")
+            print(f"Canonical Correlation Coefficient: {-self.r}")
         print(f"Canonical Correlation Coefficient: {self.r}")
 
         # initialize spin permutation of zscored imaging data (Y)
@@ -70,15 +118,36 @@ class CCA_permutation:
 
     @property
     def x_score(self):
+        """
+        Get the aligned independent variable data after CCA.
+
+        Returns:
+            array-like: The aligned independent variable data after CCA.
+
+        """
         if self.negative:
             return -self.X_c
         return self.X_c
 
     @property
     def x_weight(self):
+        """
+        Get the weights of the independent variables in the CCA.
+
+        Returns:
+            array-like: The weights of the independent variables in the CCA.
+
+        """
         return self.weights
 
     def permutative_P_statistic(self):
+        """
+        Perform permutation analysis and compute the p-value of CCA.
+
+        Returns:
+            float: The p-value of CCA.
+
+        """
         r_perm_list = np.zeros(self.perm)
         if self.use_spin_test:
             for i in tqdm(range(self.perm)):
@@ -98,6 +167,13 @@ class CCA_permutation:
         return p
 
     def compute_bootstrap(self):
+        """
+        Perform bootstrap analysis and compute the Z-scores of the weights.
+
+        Returns:
+            DataFrame: A DataFrame containing the gene list and corresponding Z-scores.
+
+        """
         rng = np.random.default_rng(self.seed)
         weight_perm = np.zeros((self.perm, self.n_features))
         for i in tqdm(range(self.perm)):

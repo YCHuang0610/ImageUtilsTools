@@ -1,3 +1,13 @@
+"""
+spin_test_utils.py
+
+Author: Yichun Huang
+Date: 26/07/2024
+
+This module provides functions to generate spin permutations of imaging data based on different methods.
+
+"""
+
 import warnings
 import numpy as np
 import pandas as pd
@@ -28,10 +38,11 @@ def generate_spin_permutation(
     - method (str, optional): The method used for spin permutation. Must be one of "vasa", "alexander_bloch",
       "vazquez_rodriguez", "baum", or "burt2020". Defaults to "vasa".
     - seed (int, optional): The random seed for reproducibility. Defaults to 1234.
-    - **kwargs (optional): Additional keyword arguments specific to certain methods.
+    - **kwargs (optional): Additional keyword arguments specific to certain methods. If use 'burt2020' method,
+      surfaces, left_dist_mat_file and right_dist_mat_file are required. Delta default is [0.1].
 
     Returns:
-    - perm_imaging (numpy.ndarray): The generated spin permutations of the imaging data.
+    - perm_imaging (numpy.ndarray): The generated spin permutations of the imaging data, with shape (n_regions, perm).
     """
     if isinstance(data, pd.Series):
         data = data.values

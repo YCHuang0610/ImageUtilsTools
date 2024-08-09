@@ -7,7 +7,23 @@ from scipy.stats import t
 from statsmodels.stats.multitest import multipletests
 
 
+# TODO: Add covariance for two sample T test
 def run_two_sample_T_test(Group1_imgs, Group2_imgs):
+    """
+    Run a two-sample T-test on the given image groups.
+
+    Args:
+        Group1_imgs (list): A list of images belonging to Group 1.
+        Group2_imgs (list): A list of images belonging to Group 2.
+
+    Returns:
+        t_map (nibabel.Nifti1Image): The T-statistic map resulting from the T-test.
+
+    Raises:
+        ValueError: If Group1_imgs or Group2_imgs are not of list type, or if they are empty lists.
+        RuntimeError: If an error occurs while performing the T-test.
+
+    """
     # 输入类型检查
     if not isinstance(Group1_imgs, list) or not isinstance(Group2_imgs, list):
         raise ValueError("Group1_imgs 和 Group2_imgs 必须是列表类型。")
