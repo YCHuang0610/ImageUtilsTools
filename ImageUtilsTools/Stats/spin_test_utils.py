@@ -4,6 +4,7 @@ import pandas as pd
 from neuromaps import images, nulls
 from brainsmash.mapgen.base import Base
 
+
 def generate_spin_permutation(
     data,
     parcellationLR,
@@ -122,7 +123,9 @@ def generate_spin_permutation(
         # delta
         deltas = kwargs.get(
             "deltas",
-            [0.1,],
+            [
+                0.1,
+            ],
         )
         deltas = np.array(deltas)
 

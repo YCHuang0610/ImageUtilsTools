@@ -136,7 +136,9 @@ def fdr_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail=
         raise RuntimeError(f"计算FDR阈值时发生错误: {e}")
 
 
-def threshold_t_map(t_map, df, alpha=0.05, two_tail=True, masker_strategy="background", method="fwer"):
+def threshold_t_map(
+    t_map, df, alpha=0.05, two_tail=True, masker_strategy="background", method="fwer"
+):
     """
     Thresholds a t-map based on the family-wise error rate (FWER) or false discovery rate (FDR).
 
@@ -164,9 +166,13 @@ def threshold_t_map(t_map, df, alpha=0.05, two_tail=True, masker_strategy="backg
 
         # 方法选择
         if method == "fwer":
-            fwe_p_value, t_threshold = fwer_threshold(t_map, df, alpha, masker_strategy, two_tail)
+            fwe_p_value, t_threshold = fwer_threshold(
+                t_map, df, alpha, masker_strategy, two_tail
+            )
         elif method == "fdr":
-            fdr_p_value, t_threshold = fdr_threshold(t_map, df, alpha, masker_strategy, two_tail)
+            fdr_p_value, t_threshold = fdr_threshold(
+                t_map, df, alpha, masker_strategy, two_tail
+            )
 
         # 应用阈值
         thresholded_t_map = threshold_img(

@@ -110,7 +110,7 @@ def Plot_MySurf_RegionWise(
     size=(500, 400),
     layout="grid",
     views=None,
-    brightness=0.5
+    brightness=0.5,
 ):
     """
     Plot a surface region-wise.
@@ -133,7 +133,15 @@ def Plot_MySurf_RegionWise(
     # map array to label
     array_LR = np.array(array_LR)
     map_array_L, map_array_R = map_array_LR_to_label(array_LR, lh_parc, rh_parc)
-    p = Plot(lh, rh, size=size, layout=layout, views=views, mirror_views=True, brightness=brightness)
+    p = Plot(
+        lh,
+        rh,
+        size=size,
+        layout=layout,
+        views=views,
+        mirror_views=True,
+        brightness=brightness,
+    )
     if color_range is not None:
         p.add_layer(
             {"left": map_array_L, "right": map_array_R},
@@ -160,7 +168,7 @@ def Plot_MySurf_RegionWise_OneHemi(
     size=(500, 400),
     layout="grid",
     views=None,
-    brightness=0.5
+    brightness=0.5,
 ):
     array_single_hemi = np.array(array_single_hemi)
     map_array = map_array_to_label(array_single_hemi, parc)

@@ -19,10 +19,12 @@ def local_corr(x, y, coor, a, method="spearmanr"):
     Returns:
     - r (ndarray): Array of local correlation values.
     """
-    v = coor / np.sqrt((coor ** 2).sum(axis=1))[:, np.newaxis]
+    v = coor / np.sqrt((coor**2).sum(axis=1))[:, np.newaxis]
     r = np.zeros(v.shape[0])
     # no values
-    vals = np.logical_and(np.logical_and(x != 0, ~np.isnan(x)), np.logical_and(y != 0, ~np.isnan(y)))
+    vals = np.logical_and(
+        np.logical_and(x != 0, ~np.isnan(x)), np.logical_and(y != 0, ~np.isnan(y))
+    )
 
     for i in numba.prange(v.shape[0]):
         cos_angle = v @ v[i]
@@ -39,7 +41,7 @@ def local_corr(x, y, coor, a, method="spearmanr"):
     return r
 
 
-def surflocalcorr(x, y, sph, a=30, method='spearmanr', return_gifti=False):
+def surflocalcorr(x, y, sph, a=30, method="spearmanr", return_gifti=False):
     """
     Calculate the surface local correlation between two input datasets.
 
@@ -70,7 +72,10 @@ def surflocalcorr(x, y, sph, a=30, method='spearmanr', return_gifti=False):
     if isinstance(sph, str):
         sph = nib.load(sph)
     coordinates, _ = sph.agg_data()
-    assert method in ["pearsonr", "spearmanr"], "Invalid method. Must be 'pearsonr' or 'spearmanr'."
+    assert method in [
+        "pearsonr",
+        "spearmanr",
+    ], "Invalid method. Must be 'pearsonr' or 'spearmanr'."
     corr = local_corr(x, y, coordinates, a, method)
     # 保存到Gifti对象
     if return_gifti:
@@ -78,6 +83,5 @@ def surflocalcorr(x, y, sph, a=30, method='spearmanr', return_gifti=False):
         corr_gifti = nib.gifti.GiftiDataArray(corr)
         corr_gifti = nib.gifti.GiftiImage(darrays=[corr_gifti])
         return corr_gifti
-    
+
     return corr
-    
