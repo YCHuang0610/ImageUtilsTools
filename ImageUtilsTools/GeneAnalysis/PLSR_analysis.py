@@ -6,6 +6,14 @@ Date: 26/07/2024
 
 This file contains functions and a class for performing Partial Least Squares Regression (PLSR) analysis on gene expression and imaging data.
 
+# pip install -e git+https://github.com/netneurolab/pypyls.git/#egg=pyls
+
+Reference:
+- https://github.com/alegiac95/Imaging-transcriptomics
+- https://github.com/netneurolab/pypyls
+- [Whitaker and Vértes, PNAS 2016](http://www.pnas.org/content/113/32/9105)
+- https://github.com/SarahMorgan/Morphometric_Similarity_SZ/blob/master/Gene_analyses.md
+
 Functions:
 - correlation(c1, c2): Calculate the correlation between two sets of data.
 
