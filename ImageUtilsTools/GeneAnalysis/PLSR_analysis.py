@@ -21,7 +21,7 @@ from neuromaps import stats
 from pyls import pls_regression
 from tqdm import tqdm
 from scipy.stats import zscore, pearsonr, spearmanr
-from ..Stats.spin_test_utlis import generate_spin_permutation
+from ..Stats.spin_test_utils import generate_spin_permutation
 
 
 def correlation(c1, c2):
@@ -39,12 +39,6 @@ def correlation(c1, c2):
     It first horizontally stacks c1 and c2, then computes the correlation matrix.
     Finally, it returns the correlation coefficients between the columns of c1 and c2.
     """
-    return np.corrcoef(np.hstack((c1, c2)), rowvar=False)[:2, -1]
-
-
-def correlation(c1, c2):
-    # c1 matrix with shape (n, 2)
-    # c2 vector with shape (n,)
     return np.corrcoef(np.hstack((c1, c2)), rowvar=False)[:2, -1]
 
 

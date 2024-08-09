@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import zscore
 from tqdm import tqdm
 from sklearn.cross_decomposition import CCA
-from ..Stats.spin_test_utlis import generate_spin_permutation
+from ..Stats.spin_test_utils import generate_spin_permutation
 
 
 def CCA_function_align_weights(X, y):
@@ -32,7 +32,7 @@ class CCA_permutation:
         density="32k",
         perm=1000,
         seed=1234,
-        **kwargs
+        **kwargs,
     ):
         self.X = zscore(X, axis=0, ddof=1)
         self.y = zscore(y, ddof=1)
@@ -59,7 +59,7 @@ class CCA_permutation:
                 perm=perm,
                 method=spin_test_method,
                 seed=self.seed,
-                **kwargs
+                **kwargs,
             )
         else:
             self.use_spin_test = False
@@ -67,7 +67,7 @@ class CCA_permutation:
     @property
     def x_score(self):
         return self.X_c
-    
+
     @property
     def x_weight(self):
         return self.weights
@@ -90,7 +90,7 @@ class CCA_permutation:
 
         print(f"p-value of CCA: {p}")
         return p
-    
+
     def compute_bootstrap(self):
         rng = np.random.default_rng(self.seed)
         weight_perm = np.zeros((self.perm, self.n_features))
@@ -113,8 +113,3 @@ class CCA_permutation:
 
         df = pd.DataFrame({"Gene": gene_list, "Z-score": Z})
         return df
-
-
-
-
-

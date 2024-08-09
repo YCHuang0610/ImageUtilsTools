@@ -1,14 +1,8 @@
 import nibabel as nib
 import numpy as np
-from ..GeneAnalysis.Corr_analysis import rank_array
+from ..utils._spearman import spearman_r
+from pathlib import PosixPath
 import numba
-
-@numba.njit
-def spearman_r(x, y):
-    x_rank = rank_array(x)
-    y_rank = rank_array(y)
-    corr = np.corrcoef(x_rank, y_rank)[0, 1]
-    return corr
 
 
 def local_corr(x, y, coor, a, method="spearmanr"):
@@ -61,12 +55,18 @@ def surflocalcorr(x, y, sph, a=30, method='spearmanr', return_gifti=False):
     numpy.ndarray or nibabel.gifti.GiftiImage: Array of local correlation values. If return_gifti is True, the result is returned as a nibabel.gifti.GiftiImage object.
 
     """
+    if isinstance(x, PosixPath):
+        x = nib.load(x)
     if isinstance(x, str):
         x = nib.load(x)
     x = x.agg_data()
+    if isinstance(y, PosixPath):
+        y = nib.load(y)
     if isinstance(y, str):
         y = nib.load(y)
     y = y.agg_data()
+    if isinstance(sph, PosixPath):
+        sph = nib.load(sph)
     if isinstance(sph, str):
         sph = nib.load(sph)
     coordinates, _ = sph.agg_data()
