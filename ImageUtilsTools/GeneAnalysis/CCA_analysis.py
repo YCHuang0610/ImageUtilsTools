@@ -14,10 +14,11 @@ def CCA_function_align_weights(X, y):
     r = np.corrcoef(X_c.T, y.T)[0, 1]
     X_weight = cca.x_weights_
     if r < 0:  # 匹配方向
+        negative = True
         X_c = -X_c
         r = -r
         X_weight = -X_weight
-    return X_c, r, X_weight
+    return X_c, r, X_weight, negative
 
 
 class CCA_permutation:
@@ -44,7 +45,10 @@ class CCA_permutation:
         self.seed = seed
 
         # run the first CCA
-        self.X_c, self.r, self.weights = CCA_function_align_weights(self.X, self.y)
+        self.X_c, self.r, self.weights, self.negative = CCA_function_align_weights(self.X, self.y)
+        if self.negative:
+            print("Negative correlation,")
+            print(f"anonical Correlation Coefficient: {-self.r}")
         print(f"Canonical Correlation Coefficient: {self.r}")
 
         # initialize spin permutation of zscored imaging data (Y)
@@ -66,6 +70,8 @@ class CCA_permutation:
 
     @property
     def x_score(self):
+        if self.negative:
+            return -self.X_c
         return self.X_c
 
     @property
@@ -77,13 +83,13 @@ class CCA_permutation:
         if self.use_spin_test:
             for i in tqdm(range(self.perm)):
                 y_permutation = self.y_perm[:, i]
-                _, r_perm, _ = CCA_function_align_weights(self.X, y_permutation)
+                _, r_perm, _, _ = CCA_function_align_weights(self.X, y_permutation)
                 r_perm_list[i] = r_perm
         else:
             rng = np.random.default_rng(self.seed)
             for i in tqdm(range(self.perm)):
                 y_permutation = rng.permutation(self.y)
-                _, r_perm, _ = CCA_function_align_weights(self.X, y_permutation)
+                _, r_perm, _, _ = CCA_function_align_weights(self.X, y_permutation)
                 r_perm_list[i] = r_perm
 
         p = (r_perm_list > self.r).sum() / self.perm
@@ -100,7 +106,7 @@ class CCA_permutation:
             )
             X_boot = self.X[bootindex, :]
             y_boot = self.y[bootindex]
-            _, _, x_weight = CCA_function_align_weights(X_boot, y_boot)
+            _, _, x_weight, _ = CCA_function_align_weights(X_boot, y_boot)
             weight_perm[i, :] = x_weight.flatten()
 
         std = np.std(weight_perm, axis=0)

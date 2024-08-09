@@ -2,3 +2,9 @@
 *.txt
 *.pyc
 .DS_Store
+# pycache
+__pycache__/
+GeneAnalysis/__pycache__/
+Plotting/__pycache__/
+Stats/__pycache__/
+utils/__pycache__/
