@@ -20,8 +20,8 @@ def map_array_to_label(array, label):
     AssertionError: If the length of the array is not equal to the number of region labels.
 
     """
-    if isinstance(array_LR, pd.Series):
-        array_LR = array_LR.values
+    if isinstance(array, pd.Series):
+        array = array.values
     if isinstance(label, str):
         label = nib.load(label).agg_data()
     else:

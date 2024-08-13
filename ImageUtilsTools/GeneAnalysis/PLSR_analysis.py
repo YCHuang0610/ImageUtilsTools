@@ -6,14 +6,6 @@ Date: 26/07/2024
 
 This file contains functions and a class for performing Partial Least Squares Regression (PLSR) analysis on gene expression and imaging data.
 
-# pip install -e git+https://github.com/netneurolab/pypyls.git/#egg=pyls
-
-Reference:
-- https://github.com/alegiac95/Imaging-transcriptomics
-- https://github.com/netneurolab/pypyls
-- [Whitaker and Vértes, PNAS 2016](http://www.pnas.org/content/113/32/9105)
-- https://github.com/SarahMorgan/Morphometric_Similarity_SZ/blob/master/Gene_analyses.md
-
 Functions:
 - correlation(c1, c2): Calculate the correlation between two sets of data.
 
@@ -29,7 +21,8 @@ from neuromaps import stats
 from pyls import pls_regression
 from tqdm import tqdm
 from scipy.stats import zscore, pearsonr, spearmanr
-from ..Stats.spin_test_utils import generate_spin_permutation
+from ..Stats.spin_test_utlis import generate_spin_permutation
+from ..utils.nan_utils import NanHelper
 
 
 def correlation(c1, c2):
@@ -116,6 +109,13 @@ class TransImgPLS:
 
         # initialize input data and zscore imaging data and gene expression data
         self.Y = imaging_data.reshape(-1, 1)
+        # 考虑缺失值的问题：
+        self.nan_helper = NanHelper(gene_expression)
+        if self.nan_helper.have_nan:
+            print("Have nan rows in gene expression data:")
+            gene_expression = self.nan_helper.transform_delete_nan_rows(gene_expression)
+            self.Y = self.nan_helper.transform_delete_nan_rows(self.Y)
+        # 继续
         self.Y = zscore(self.Y, axis=0, ddof=1)
         self.X = zscore(gene_expression, axis=0, ddof=1)
         self.n_regions = self.X.shape[0]
@@ -212,7 +212,12 @@ class TransImgPLS:
                 PC, r, p
             )
         )
-        return self.XS[:, PC - 1]
+        # Nan处理
+        if self.nan_helper.have_nan:
+            output_XS = self.nan_helper.inverse_transform(self.XS[:, PC - 1])
+        else:
+            output_XS = self.XS[:, PC - 1]
+        return output_XS
 
     def plot_expVar(self, dim=15, plot=False, savefig=None):
         """
