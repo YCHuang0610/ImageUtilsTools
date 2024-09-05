@@ -21,8 +21,10 @@ from neuromaps import stats
 from pyls import pls_regression
 from tqdm import tqdm
 from scipy.stats import zscore, pearsonr, spearmanr
-from ..Stats.spin_test_utlis import generate_spin_permutation
+from ..Stats.spin_test_utils import generate_spin_permutation
 from ..utils.nan_utils import NanHelper
+from scipy.stats import norm
+from statsmodels.stats.multitest import multipletests
 
 
 def correlation(c1, c2):
@@ -391,14 +393,34 @@ class TransImgPLS:
         Z1 = np.sort(temp_w1)[::-1]
         ind1 = np.argsort(temp_w1)[::-1]
         PLS1_gene_list = self.PLS1_gene_labels[ind1]
+        # Calculate P value
+        P_val = norm.sf(np.abs(Z1))  # one-sided p-value
+        _, P_adj, _, _ = multipletests(P_val, method="fdr_bh")
         # PC2
         Z2 = np.sort(temp_w2)[::-1]
         ind2 = np.argsort(temp_w2)[::-1]
         PLS2_gene_list = self.PLS2_gene_labels[ind2]
+        # Calculate P value
+        P_val = norm.sf(np.abs(Z2))
+        _, P_adj, _, _ = multipletests(P_val, method="fdr_bh")
 
         # write to dataframe
-        df_PLS1 = pd.DataFrame({"Gene": PLS1_gene_list, "Z-score": Z1})
-        df_PLS2 = pd.DataFrame({"Gene": PLS2_gene_list, "Z-score": Z2})
+        df_PLS1 = pd.DataFrame(
+            {
+                "Gene": PLS1_gene_list,
+                "Z-score": Z1,
+                "P-value": P_val,
+                "P-adjusted": P_adj,
+            }
+        )
+        df_PLS2 = pd.DataFrame(
+            {
+                "Gene": PLS2_gene_list,
+                "Z-score": Z2,
+                "P-value": P_val,
+                "P-adjusted": P_adj,
+            }
+        )
         return df_PLS1, df_PLS2
 
     @staticmethod

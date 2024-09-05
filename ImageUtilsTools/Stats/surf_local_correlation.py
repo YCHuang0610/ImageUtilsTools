@@ -33,9 +33,9 @@ def local_corr(x, y, coor, a, method="spearmanr"):
     """
     v = coor / np.sqrt((coor**2).sum(axis=1))[:, np.newaxis]
     r = np.zeros(v.shape[0])
-    # no values
+    # no values # It seems that the value 0 in the surface data is always considered as nan value, especially when the you plot it. But the value 0 is not a nan value, so I remove the condition x != 0 and y != 0.
     vals = np.logical_and(
-        np.logical_and(x != 0, ~np.isnan(x)), np.logical_and(y != 0, ~np.isnan(y))
+        ~np.isnan(x), ~np.isnan(y)
     )
 
     for i in numba.prange(v.shape[0]):
@@ -49,7 +49,7 @@ def local_corr(x, y, coor, a, method="spearmanr"):
         elif method == "spearmanr":
             r[i] = spearman_r(x[j], y[j])
 
-    r[~vals] = 0
+    r[~vals] = np.nan
     return r
 
 
