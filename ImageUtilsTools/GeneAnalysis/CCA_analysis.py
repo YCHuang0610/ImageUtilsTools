@@ -27,6 +27,7 @@ def CCA_function_align_weights(X, y):
     X_c, y_c = cca.transform(X, y)
     r = np.corrcoef(X_c.T, y.T)[0, 1]
     X_weight = cca.x_weights_
+    negative = False
     if r < 0:  # 匹配方向
         negative = True
         X_c = -X_c
@@ -120,6 +121,8 @@ class CCA_permutation:
     def x_score(self):
         """
         Get the aligned independent variable data after CCA.
+        The X_c is positive aligned with the dependent variable.
+        So, if the correlation is negative, the X_c will be negative aligned with the dependent variable.
 
         Returns:
             array-like: The aligned independent variable data after CCA.
