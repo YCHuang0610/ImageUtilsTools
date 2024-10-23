@@ -1,8 +1,12 @@
 import nibabel as nib
-
-from surfplot import Plot
 import numpy as np
 import pandas as pd
+
+from surfplot import Plot
+from surfplot.utils import threshold
+
+from neuromaps.transforms import mni152_to_fslr
+from neuromaps.datasets import fetch_fslr
 
 
 def map_array_to_label(array, label):
@@ -80,8 +84,17 @@ def Plot_MySurf_VertexWise(
     size=(500, 400),
     layout="grid",
     views=None,
+    brightness=0.5,
 ):
-    p = Plot(lh, rh, size=size, layout=layout, views=views, mirror_views=True)
+    p = Plot(
+        lh,
+        rh,
+        size=size,
+        layout=layout,
+        views=views,
+        mirror_views=True,
+        brightness=brightness,
+    )
     if color_range is not None:
         p.add_layer(
             {"left": left_data, "right": right_data},
@@ -94,6 +107,35 @@ def Plot_MySurf_VertexWise(
     figure = p.build()
     if title is not None:
         figure.axes[0].set_title(title)
+    return figure
+
+
+def Plot_MySurf_mni152Volume(
+    img,
+    two_side=True,  # 'two_side', 'one_side'
+    suface_type="inflated",
+    cutoff=None,
+    **kwargs,
+):
+    gii_lh, gii_rh = mni152_to_fslr(img)
+
+    if cutoff is not None:
+        data_lh = threshold(gii_lh.agg_data(), cutoff, two_sided=two_side)
+        data_rh = threshold(gii_rh.agg_data(), cutoff, two_sided=two_side)
+    else:
+        data_lh = gii_lh.agg_data()
+        data_rh = gii_rh.agg_data()
+
+    surfaces = fetch_fslr()
+    lh, rh = surfaces[suface_type]
+    figure = Plot_MySurf_VertexWise(
+        data_lh,
+        data_rh,
+        lh,
+        rh,
+        **kwargs,
+    )
+
     return figure
 
 
