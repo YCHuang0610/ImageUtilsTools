@@ -132,7 +132,7 @@ def Plot_MySurf_mni152Volume(
     medwall = np.loadtxt(medwall).astype(int)
     data_rl = np.concatenate([data_lh, data_rh], axis=0)
     data_rl[medwall==1] = np.nan
-    data_rh, data_lh = np.split(data_rl, 2)
+    data_lh, data_rh = np.split(data_rl, 2)
 
     surfaces = fetch_fslr()
     lh, rh = surfaces[suface_type]
@@ -143,7 +143,6 @@ def Plot_MySurf_mni152Volume(
         rh,
         **kwargs,
     )
-
     return figure
 
 
