@@ -1,3 +1,4 @@
+import os
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -125,6 +126,13 @@ def Plot_MySurf_mni152Volume(
     else:
         data_lh = gii_lh.agg_data()
         data_rh = gii_rh.agg_data()
+
+    # mask medial wall
+    medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall.tsv'))
+    medwall = np.loadtxt(medwall).astype(int)
+    data_rl = np.concatenate([data_lh, data_rh], axis=0)
+    data_rl[medwall==1] = np.nan
+    data_rh, data_lh = np.split(data_rl, 2)
 
     surfaces = fetch_fslr()
     lh, rh = surfaces[suface_type]
