@@ -70,15 +70,13 @@ def surflocalcorr(x, y, sph, a=30, method="spearmanr", return_gifti=False):
 
     """
     if isinstance(x, PosixPath):
-        x = nib.load(x)
+        x = nib.load(x).agg_data()
     if isinstance(x, str):
-        x = nib.load(x)
-    x = x.agg_data()
+        x = nib.load(x).agg_data()
     if isinstance(y, PosixPath):
-        y = nib.load(y)
+        y = nib.load(y).agg_data()
     if isinstance(y, str):
-        y = nib.load(y)
-    y = y.agg_data()
+        y = nib.load(y).agg_data()
     if isinstance(sph, PosixPath):
         sph = nib.load(sph)
     if isinstance(sph, str):

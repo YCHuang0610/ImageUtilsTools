@@ -111,6 +111,15 @@ def Plot_MySurf_VertexWise(
     return figure
 
 
+def remove_medial_wall(data_lh, data_rh):
+    medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall.tsv'))
+    medwall = np.loadtxt(medwall).astype(int)
+    data_rl = np.concatenate([data_lh, data_rh], axis=0)
+    data_rl[medwall==1] = np.nan
+    data_lh, data_rh = np.split(data_rl, 2)
+    return data_lh, data_rh
+
+
 def Plot_MySurf_mni152Volume(
     img,
     two_side=True,  # 'two_side', 'one_side'
@@ -128,11 +137,7 @@ def Plot_MySurf_mni152Volume(
         data_rh = gii_rh.agg_data()
 
     # mask medial wall
-    medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall.tsv'))
-    medwall = np.loadtxt(medwall).astype(int)
-    data_rl = np.concatenate([data_lh, data_rh], axis=0)
-    data_rl[medwall==1] = np.nan
-    data_lh, data_rh = np.split(data_rl, 2)
+    data_lh, data_rh = remove_medial_wall(data_lh, data_rh)
 
     surfaces = fetch_fslr()
     lh, rh = surfaces[suface_type]
