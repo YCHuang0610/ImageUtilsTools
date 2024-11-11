@@ -111,8 +111,12 @@ def Plot_MySurf_VertexWise(
     return figure
 
 
-def remove_medial_wall(data_lh, data_rh):
-    medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall.tsv'))
+def remove_medial_wall(data_lh, data_rh, species="human"):
+    if species == "human":
+        medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall.tsv'))
+    elif species == "monkey":
+        medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall_monkey.tsv'))
+    
     medwall = np.loadtxt(medwall).astype(int)
     data_rl = np.concatenate([data_lh, data_rh], axis=0)
     data_rl[medwall==1] = np.nan
