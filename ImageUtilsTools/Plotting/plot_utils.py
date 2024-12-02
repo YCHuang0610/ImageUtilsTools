@@ -161,6 +161,8 @@ def Plot_MySurf_RegionWise(
     rh_parc,
     lh,
     rh,
+    as_outline=False,
+    outline_alpha=1,
     cmap="viridis",
     color_range=None,
     cbar=True,
@@ -209,6 +211,14 @@ def Plot_MySurf_RegionWise(
         )
     else:
         p.add_layer({"left": map_array_L, "right": map_array_R}, cbar=cbar, cmap=cmap)
+    if as_outline:
+        p.add_layer(
+            {"left": lh_parc, "right": rh_parc},
+            as_outline=True,
+            cbar=False,
+            cmap="gray",
+            alpha=outline_alpha,
+        )
     figure = p.build()
     if title is not None:
         figure.axes[0].set_title(title)
@@ -219,6 +229,8 @@ def Plot_MySurf_RegionWise_OneHemi(
     array_single_hemi,
     parc,
     surf,
+    as_outline=False,
+    outline_alpha=1,
     cmap="viridis",
     color_range=None,
     cbar=True,
@@ -235,6 +247,8 @@ def Plot_MySurf_RegionWise_OneHemi(
         p.add_layer(map_array, cbar=cbar, cmap=cmap, color_range=color_range)
     else:
         p.add_layer(map_array, cbar=cbar, cmap=cmap)
+    if as_outline:
+        p.add_layer(parc, as_outline=True, cbar=False, cmap="gray", alpha=outline_alpha)
     figure = p.build()
     if title is not None:
         figure.axes[0].set_title(title)
