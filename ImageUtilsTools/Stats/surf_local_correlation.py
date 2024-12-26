@@ -1,4 +1,6 @@
 """
+Author: [Yichun Huang]
+
 This module provides functions for calculating local correlation between two surface between two input.
 
 Reference:

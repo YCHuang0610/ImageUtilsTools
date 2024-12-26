@@ -24,13 +24,13 @@ def run_two_sample_T_test(Group1_imgs, Group2_imgs):
         RuntimeError: If an error occurs while performing the T-test.
 
     """
-    # 输入类型检查
+    # check input
     if not isinstance(Group1_imgs, list) or not isinstance(Group2_imgs, list):
-        raise ValueError("Group1_imgs 和 Group2_imgs 必须是列表类型。")
+        raise ValueError("Group1_imgs and Group2_imgs must be a list of images.")
 
-    # 输入长度检查
+    # check if the lists are empty
     if len(Group1_imgs) == 0 or len(Group2_imgs) == 0:
-        raise ValueError("Group1_imgs 和 Group2_imgs 不能是空列表。")
+        raise ValueError("Group1_imgs and Group2_imgs cannot be empty lists.")
 
     try:
         n_Group1 = len(Group1_imgs)
@@ -52,8 +52,7 @@ def run_two_sample_T_test(Group1_imgs, Group2_imgs):
         )
         return t_map
     except Exception as e:
-        # 捕获并处理可能的异常
-        raise RuntimeError(f"在执行T检验时发生错误: {e}")
+        raise RuntimeError(f"Error when doing T test: {e}")
 
 
 def fwer_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail=True):
@@ -72,11 +71,11 @@ def fwer_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail
 
     """
     try:
-        # 输入验证
+        # check input
         if not isinstance(alpha, (float, int)) or not (0 < alpha < 1):
-            raise ValueError("alpha 必须是0到1之间的数字。")
+            raise ValueError("alpha needs to be a number between 0 and 1.")
         if not isinstance(df, int) or df <= 0:
-            raise ValueError("df 必须是正整数。")
+            raise ValueError("df needs to be a positive integer.")
         if masker_strategy not in [
             "background",
             "whole-brain-template",
@@ -85,12 +84,11 @@ def fwer_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail
             "csf-template",
         ]:
             raise ValueError(
-                "masker_strategy 必须是 'background' 或 'whole-brain-template'等。"
+                "masker_strategy have to be either 'background' or 'whole-brain-template'。"
             )
         if not isinstance(two_tail, bool):
-            raise ValueError("two_tail 必须是布尔值。")
+            raise ValueError("two_tail must be a boolean.")
 
-        # 计算过程
         masker = NiftiMasker(mask_strategy=masker_strategy).fit(t_map)
         stats = np.ravel(masker.transform(t_map))
         n_voxels = np.size(stats)
@@ -100,8 +98,7 @@ def fwer_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail
         t_threshold = t.ppf(1 - fwe_p_value, df)
         return fwe_p_value, t_threshold
     except Exception as e:
-        # 捕获并处理可能的异常
-        raise RuntimeError(f"计算FWER阈值时发生错误: {e}")
+        raise RuntimeError(f"Error when calculating FWER: {e}")
 
 
 def fdr_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail=True):
@@ -122,13 +119,13 @@ def fdr_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail=
     try:
         # 输入验证
         if not isinstance(alpha, (float, int)) or not (0 < alpha < 1):
-            raise ValueError("alpha 必须是0到1之间的数字。")
+            raise ValueError("alpha must be a number between 0 and 1.")
         if not isinstance(df, int) or df <= 0:
-            raise ValueError("df 必须是正整数。")
+            raise ValueError("df must be a positive integer.")
         if masker_strategy not in ["background", "whole-brain"]:
-            raise ValueError("masker_strategy 必须是 'background' 或 'whole-brain'。")
+            raise ValueError("masker_strategy have to be either 'background' or 'whole-brain'")
         if not isinstance(two_tail, bool):
-            raise ValueError("two_tail 必须是布尔值。")
+            raise ValueError("two_tail must be a boolean.")
 
         # 计算过程
         masker = NiftiMasker(mask_strategy=masker_strategy).fit(t_map)
@@ -149,7 +146,7 @@ def fdr_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail=
         return fdr_p_values, t_threshold
     except Exception as e:
         # 捕获并处理可能的异常
-        raise RuntimeError(f"计算FDR阈值时发生错误: {e}")
+        raise RuntimeError(f"Error when calculating FDR: {e}")
 
 
 def threshold_t_map(
@@ -172,13 +169,13 @@ def threshold_t_map(
     try:
         # 输入验证
         if not isinstance(df, int) or df <= 0:
-            raise ValueError("df 必须是正整数。")
+            raise ValueError("df must be a positive integer.")
         if not isinstance(alpha, float) or not (0 < alpha < 1):
-            raise ValueError("alpha 必须是0到1之间的浮点数。")
+            raise ValueError("alpha must be a number between 0 and 1.")
         if not isinstance(two_tail, bool):
-            raise ValueError("two_tail 必须是布尔值。")
+            raise ValueError("two_tail must be a boolean.")
         if method not in ["fwer", "fdr"]:
-            raise ValueError("method 必须是 'fwer' 或 'fdr'。")
+            raise ValueError("method must be 'fwer' or 'fdr'.")
 
         # 方法选择
         if method == "fwer":
@@ -201,4 +198,4 @@ def threshold_t_map(
         return thresholded_t_map
     except Exception as e:
         # 捕获并处理可能的异常
-        raise RuntimeError(f"在阈值化t-map时发生错误: {e}")
+        raise RuntimeError(f"Error when thresholding the T map: {e}")

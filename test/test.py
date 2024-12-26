@@ -4,7 +4,7 @@ os.chdir('..')
 import numpy as np
 
 from neuromaps.datasets import fetch_fslr
-from ImageUtilsTools.Plotting.plot_utils import *
+from ImageUtilsTools.Plotting import *
 from ImageUtilsTools.Stats.surf_local_correlation import surflocalcorr
 from ImageUtilsTools.GeneAnalysis._data_config import data
 from ImageUtilsTools.utils._gii_io import load_gii

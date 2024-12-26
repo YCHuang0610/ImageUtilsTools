@@ -1,3 +1,11 @@
+"""
+Author: [Yichun Huang]
+Date: [12/26/2024]
+
+This module contains functions and classes for performing gene annotation in python.
+
+"""
+
 import pandas as pd
 import gzip
 

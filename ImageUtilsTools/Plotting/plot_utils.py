@@ -1,3 +1,11 @@
+'''
+Author: [Yichun Huang]
+
+This module contains functions and classes for plotting data on a brain surface.
+Functions for surface plotting are mainly depend on the surfplot package.
+
+'''
+
 import os
 import nibabel as nib
 import numpy as np
