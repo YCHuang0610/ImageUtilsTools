@@ -10,10 +10,9 @@ Functions:
 - surflocalcorr(x, y, sph, a=30, method="spearmanr", return_gifti=False): Calculate the surface local correlation between two input.
 """
 
-import nibabel as nib
 import numpy as np
 from ..utils._spearman import spearman_r
-from pathlib import PosixPath
+from ..utils._gii_io import load_gii, save_gii
 import numba
 
 
@@ -34,9 +33,7 @@ def local_corr(x, y, coor, a, method="spearmanr"):
     v = coor / np.sqrt((coor**2).sum(axis=1))[:, np.newaxis]
     r = np.zeros(v.shape[0])
     # no values # It seems that the value 0 in the surface data is always considered as nan value, especially when the you plot it. But the value 0 is not a nan value, so I remove the condition x != 0 and y != 0.
-    vals = np.logical_and(
-        ~np.isnan(x), ~np.isnan(y)
-    )
+    vals = np.logical_and(~np.isnan(x), ~np.isnan(y))
 
     for i in numba.prange(v.shape[0]):
         cos_angle = v @ v[i]
@@ -69,18 +66,9 @@ def surflocalcorr(x, y, sph, a=30, method="spearmanr", return_gifti=False):
     numpy.ndarray or nibabel.gifti.GiftiImage: Array of local correlation values. If return_gifti is True, the result is returned as a nibabel.gifti.GiftiImage object.
 
     """
-    if isinstance(x, PosixPath):
-        x = nib.load(x).agg_data()
-    if isinstance(x, str):
-        x = nib.load(x).agg_data()
-    if isinstance(y, PosixPath):
-        y = nib.load(y).agg_data()
-    if isinstance(y, str):
-        y = nib.load(y).agg_data()
-    if isinstance(sph, PosixPath):
-        sph = nib.load(sph)
-    if isinstance(sph, str):
-        sph = nib.load(sph)
+    x = load_gii(x).agg_data()
+    y = load_gii(y).agg_data()
+    sph = load_gii(sph)
     coordinates, _ = sph.agg_data()
     assert method in [
         "pearsonr",
@@ -89,9 +77,6 @@ def surflocalcorr(x, y, sph, a=30, method="spearmanr", return_gifti=False):
     corr = local_corr(x, y, coordinates, a, method)
     # 保存到Gifti对象
     if return_gifti:
-        corr = corr.astype(np.float32)
-        corr_gifti = nib.gifti.GiftiDataArray(corr)
-        corr_gifti = nib.gifti.GiftiImage(darrays=[corr_gifti])
+        corr_gifti = save_gii(corr)
         return corr_gifti
-
     return corr
