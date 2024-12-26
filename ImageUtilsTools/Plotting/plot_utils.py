@@ -3,11 +3,74 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 
+from ..utils._gii_io import load_gii
+
 from surfplot import Plot
 from surfplot.utils import threshold
 
 from neuromaps.transforms import mni152_to_fslr
 from neuromaps.datasets import fetch_fslr
+
+
+def plot_base(
+    left_data=None,
+    right_data=None,
+    surf_lh=None,
+    surf_rh=None,
+    cmap="viridis",
+    color_range=None,
+    cbar=True,
+    layout="grid",
+    size=(500, 400),
+    views=None,
+    brightness=0.5,
+    hemi="both",
+):
+    if hemi == "both":
+        p = Plot(
+            surf_lh=surf_lh,
+            surf_rh=surf_rh,
+            size=size,
+            layout=layout,
+            views=views,
+            brightness=brightness,
+        )
+        if color_range is not None:
+            p.add_layer(
+                {"left": left_data, "right": right_data},
+                cbar=cbar,
+                cmap=cmap,
+                color_range=color_range,
+            )
+        else:
+            p.add_layer({"left": left_data, "right": right_data}, cbar=cbar, cmap=cmap)
+    elif hemi == "left":
+        p = Plot(
+            surf_lh=surf_lh,
+            size=size,
+            layout=layout,
+            views=views,
+            brightness=brightness,
+        )
+        if color_range is not None:
+            p.add_layer(left_data, cbar=cbar, cmap=cmap, color_range=color_range)
+        else:
+            p.add_layer(left_data, cbar=cbar, cmap=cmap)
+    elif hemi == "right":
+        p = Plot(
+            surf_rh=surf_rh,
+            size=size,
+            layout=layout,
+            views=views,
+            brightness=brightness,
+        )
+        if color_range is not None:
+            p.add_layer(right_data, cbar=cbar, cmap=cmap, color_range=color_range)
+        else:
+            p.add_layer(right_data, cbar=cbar, cmap=cmap)
+    else:
+        raise ValueError("hemi should be 'both', 'left' or 'right'")
+    return p
 
 
 def map_array_to_label(array, label):
@@ -27,13 +90,7 @@ def map_array_to_label(array, label):
     """
     if isinstance(array, pd.Series):
         array = array.values
-    if isinstance(label, str):
-        label = nib.load(label).agg_data()
-    else:
-        assert isinstance(
-            label, nib.gifti.gifti.GiftiImage
-        ), "label should be a path or a GiftiImage object"
-        label = label.agg_data()
+    label = load_gii(label).agg_data()
     # 0 is the medial wall, so we need to exclude it
     unique_label = np.unique(label)
     unique_label = unique_label[unique_label != 0]
@@ -59,13 +116,12 @@ def map_array_LR_to_label(array_LR, lh_parc, rh_parc):
     Returns:
         tuple: A tuple containing the mapped left hemisphere array and the mapped right hemisphere array.
     """
-    if isinstance(lh_parc, str):
-        label_num = len(np.unique(nib.load(lh_parc).agg_data())) - 1
-    else:
-        assert isinstance(
-            lh_parc, nib.gifti.gifti.GiftiImage
-        ), "lh_parc should be a path or a GiftiImage object"
-        label_num = len(np.unique(lh_parc.agg_data())) - 1
+    parc_data_L = load_gii(lh_parc).agg_data()
+    parc_data_R = load_gii(rh_parc).agg_data()
+    assert len(parc_data_L) == len(
+        parc_data_R
+    ), "The length of left and right hemisphere parcellation should be equal"
+    label_num = len(np.unique(parc_data_L)) - 1
     array_L = array_LR[:label_num]
     array_R = array_LR[label_num:]
     map_array_L = map_array_to_label(array_L, lh_parc)
@@ -73,55 +129,42 @@ def map_array_LR_to_label(array_LR, lh_parc, rh_parc):
     return map_array_L, map_array_R
 
 
+def remove_medial_wall(data_lh, data_rh, species="human"):
+    if species == "human":
+        medwall = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "medwall.tsv")
+        )
+    elif species == "monkey":
+        medwall = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "medwall_monkey.tsv")
+        )
+
+    medwall = np.loadtxt(medwall).astype(int)
+    data_rl = np.concatenate([data_lh, data_rh], axis=0)
+    data_rl[medwall == 1] = np.nan
+    data_lh, data_rh = np.split(data_rl, 2)
+    return data_lh, data_rh
+
+
 def Plot_MySurf_VertexWise(
     left_data,
     right_data,
     lh,
     rh,
-    cmap="viridis",
-    color_range=None,
-    cbar=True,
     title=None,
-    size=(500, 400),
-    layout="grid",
-    views=None,
-    brightness=0.5,
+    **kwargs,
 ):
-    p = Plot(
-        lh,
-        rh,
-        size=size,
-        layout=layout,
-        views=views,
-        mirror_views=True,
-        brightness=brightness,
+    p = plot_base(
+        left_data=left_data,
+        right_data=right_data,
+        surf_lh=lh,
+        surf_rh=rh,
+        **kwargs,
     )
-    if color_range is not None:
-        p.add_layer(
-            {"left": left_data, "right": right_data},
-            cbar=cbar,
-            cmap=cmap,
-            color_range=color_range,
-        )
-    else:
-        p.add_layer({"left": left_data, "right": right_data}, cbar=cbar, cmap=cmap)
     figure = p.build()
     if title is not None:
         figure.axes[0].set_title(title)
     return figure
-
-
-def remove_medial_wall(data_lh, data_rh, species="human"):
-    if species == "human":
-        medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall.tsv'))
-    elif species == "monkey":
-        medwall = os.path.abspath(os.path.join(os.path.dirname(__file__), 'medwall_monkey.tsv'))
-    
-    medwall = np.loadtxt(medwall).astype(int)
-    data_rl = np.concatenate([data_lh, data_rh], axis=0)
-    data_rl[medwall==1] = np.nan
-    data_lh, data_rh = np.split(data_rl, 2)
-    return data_lh, data_rh
 
 
 def Plot_MySurf_mni152Volume(
@@ -163,14 +206,9 @@ def Plot_MySurf_RegionWise(
     rh,
     as_outline=False,
     outline_alpha=1,
-    cmap="viridis",
-    color_range=None,
-    cbar=True,
+    outline_cmap="gray",
     title=None,
-    size=(500, 400),
-    layout="grid",
-    views=None,
-    brightness=0.5,
+    **kwargs,
 ):
     """
     Plot a surface region-wise.
@@ -193,30 +231,19 @@ def Plot_MySurf_RegionWise(
     # map array to label
     array_LR = np.array(array_LR)
     map_array_L, map_array_R = map_array_LR_to_label(array_LR, lh_parc, rh_parc)
-    p = Plot(
-        lh,
-        rh,
-        size=size,
-        layout=layout,
-        views=views,
-        mirror_views=True,
-        brightness=brightness,
+    p = plot_base(
+        left_data=map_array_L,
+        right_data=map_array_R,
+        surf_lh=lh,
+        surf_rh=rh,
+        **kwargs,
     )
-    if color_range is not None:
-        p.add_layer(
-            {"left": map_array_L, "right": map_array_R},
-            cbar=cbar,
-            cmap=cmap,
-            color_range=color_range,
-        )
-    else:
-        p.add_layer({"left": map_array_L, "right": map_array_R}, cbar=cbar, cmap=cmap)
     if as_outline:
         p.add_layer(
             {"left": lh_parc, "right": rh_parc},
             as_outline=True,
             cbar=False,
-            cmap="gray",
+            cmap=outline_cmap,
             alpha=outline_alpha,
         )
     figure = p.build()
@@ -231,31 +258,45 @@ def Plot_MySurf_RegionWise_OneHemi(
     surf,
     as_outline=False,
     outline_alpha=1,
-    cmap="viridis",
-    color_range=None,
-    cbar=True,
+    outline_cmap="gray",
     title=None,
-    size=(500, 400),
-    layout="grid",
-    views=None,
-    brightness=0.5,
+    hemi="left",
+    size=(500, 200),
+    **kwargs,
 ):
     array_single_hemi = np.array(array_single_hemi)
     map_array = map_array_to_label(array_single_hemi, parc)
-    p = Plot(surf_lh=surf, size=size, layout=layout, views=views, brightness=brightness)
-    if color_range is not None:
-        p.add_layer(map_array, cbar=cbar, cmap=cmap, color_range=color_range)
-    else:
-        p.add_layer(map_array, cbar=cbar, cmap=cmap)
+    p = plot_base(
+        left_data=map_array if hemi == "left" else None,
+        right_data=map_array if hemi == "right" else None,
+        surf_lh=surf if hemi == "left" else None,
+        surf_rh=surf if hemi == "right" else None,
+        hemi=hemi,
+        size=size,
+        **kwargs,
+    )
     if as_outline:
-        p.add_layer(parc, as_outline=True, cbar=False, cmap="gray", alpha=outline_alpha)
+        p.add_layer(
+            parc, as_outline=True, cbar=False, cmap=outline_cmap, alpha=outline_alpha
+        )
     figure = p.build()
     if title is not None:
         figure.axes[0].set_title(title)
     return figure
 
 
-def Plot_Each_Region_Num(region_num, parc_hemi, surf_hemi, size=(500, 200)):
+def Plot_Each_Region_Num(
+    region_num,
+    parc_hemi,
+    surf_hemi,
+    as_outline=True,
+    outline_alpha=1,
+    outline_cmap="gray",
+    size=(500, 200),
+    hemi="left",
+    title=None,
+    **kwargs,
+):
     """
     Plot each region number on a surface.
 
@@ -276,8 +317,22 @@ def Plot_Each_Region_Num(region_num, parc_hemi, surf_hemi, size=(500, 200)):
     label = label - min_label + 1
     # 画图
     regions = np.where(np.isin(label, region_num), label, 0)
-    p = Plot(surf_hemi, size=size)
-    p.add_layer(regions, cmap="tab20", cbar=False)
-    p.add_layer(regions, cmap="gray", as_outline=True, cbar=False)
+    p = plot_base(
+        left_data=regions if hemi == "left" or hemi == "both" else None,
+        right_data=regions if hemi == "right" or hemi == "both" else None,
+        surf_lh=surf_hemi if hemi == "left" or hemi == "both" else None,
+        surf_rh=surf_hemi if hemi == "right" or hemi == "both" else None,
+        cmap="tab20",
+        cbar=False,
+        size=size,
+        hemi=hemi,
+        **kwargs,
+    )
+    if as_outline:
+        p.add_layer(
+            regions, cmap=outline_cmap, as_outline=True, cbar=False, alpha=outline_alpha
+        )
     figure = p.build()
+    if title is not None:
+        figure.axes[0].set_title(title)
     return figure
