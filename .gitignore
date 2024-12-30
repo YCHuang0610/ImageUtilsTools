@@ -1,4 +1,7 @@
 *.csv
+ImageUtilsTools/GeneAnalysis/data/*
+!ImageUtilsTools/GeneAnalysis/data/sample_info_vertex_mapped.csv
+!ImageUtilsTools/GeneAnalysis/data/ahba_sampleInfo.csv
 *.txt
 *.pyc
 .DS_Store

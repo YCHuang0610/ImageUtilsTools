@@ -22,4 +22,6 @@ data = {
     "Glasser2016_AHBA_GSVA_LR_withheader": os.path.join(
         DATA, "ahba_GSVA_GO_Glassser2016LR_withHeader.csv"
     ),
+    "ahba_sampleInfo": os.path.join(DATA, "sampleInfo.csv"),
+    "sample_info_vertex_mapped": os.path.join(DATA, "sample_info_vertex_mapped.csv"),
 }
