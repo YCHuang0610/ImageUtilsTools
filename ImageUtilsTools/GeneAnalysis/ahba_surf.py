@@ -179,7 +179,9 @@ class AHBA_Prerocess_fsLR:
             raise ValueError("Please provide at least one parcellation file.")
 
         self.sample_info_vertex_mapped.dropna(subset=["atlas_label"], inplace=True)
-        self.sample_info_vertex_mapped = self.sample_info_vertex_mapped.loc[self.sample_info_vertex_mapped["atlas_label"] != 0]
+        self.sample_info_vertex_mapped = self.sample_info_vertex_mapped.loc[
+            self.sample_info_vertex_mapped["atlas_label"] != 0
+        ]
         self.expression = self.expression.loc[self.sample_info_vertex_mapped.index]
 
         return self.sample_info_vertex_mapped

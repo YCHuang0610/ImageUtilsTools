@@ -123,7 +123,9 @@ def fdr_threshold(t_map, df, alpha=0.05, masker_strategy="background", two_tail=
         if not isinstance(df, int) or df <= 0:
             raise ValueError("df must be a positive integer.")
         if masker_strategy not in ["background", "whole-brain"]:
-            raise ValueError("masker_strategy have to be either 'background' or 'whole-brain'")
+            raise ValueError(
+                "masker_strategy have to be either 'background' or 'whole-brain'"
+            )
         if not isinstance(two_tail, bool):
             raise ValueError("two_tail must be a boolean.")
 
