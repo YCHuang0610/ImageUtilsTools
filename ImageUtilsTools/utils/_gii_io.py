@@ -57,7 +57,7 @@ class Save_Gii:
     - surf: Surface data, requiring (vertices, faces). Often *.surf.gii files.
     """
 
-    def __init__(self, array, file=None, gii_type="array", colortable=None):
+    def __init__(self, array, file=None, gii_type="metric", colortable=None):
         """
         Initialize the Save_Gii class.
 
@@ -71,7 +71,9 @@ class Save_Gii:
         self.file = file
         self.colortable = colortable
         self.img = None
-        if gii_type == "array":
+        if gii_type not in ["metric", "label", "surf"]:
+            raise ValueError("Invalid GIFTI type. Must be 'metric', 'label', or 'surf'.")
+        elif gii_type == "metric":
             self.img = self.save_darray()
         elif gii_type == "label":
             self.img = self.save_dlabel()
@@ -86,8 +88,8 @@ class Save_Gii:
             A nibabel.gifti.GiftiImage object.
         """
         agg_data = self.array.astype(np.float32)
-        agg_data = nib.gifti.GiftiDataArray(agg_data)
-        img = nib.gifti.GiftiImage(darrays=[agg_data])
+        agg_data = list(nib.gifti.GiftiDataArray(data=data) for data in agg_data.T)
+        img = nib.gifti.GiftiImage(darrays=agg_data)
 
         if self.file is not None:
             img.to_filename(self.file)
