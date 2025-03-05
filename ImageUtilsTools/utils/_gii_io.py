@@ -47,22 +47,44 @@ def save_gii(array, file=None):
         img.to_filename(file)
     else:
         return img
-    
+
 
 class Save_Gii:
-    def __init__(self, array, file=None, gii_type='array', colortable=None):
+    """
+    A utility class to create and save GIFTI (.gii) files in different modes:
+    - array: Regular floating-point data. Often *.darray.gii files.
+    - label: Integer label data with optional color table. Often *.dlabel.gii files.
+    - surf: Surface data, requiring (vertices, faces). Often *.surf.gii files.
+    """
+
+    def __init__(self, array, file=None, gii_type="array", colortable=None):
+        """
+        Initialize the Save_Gii class.
+
+        Args:
+            array: Numpy array for data, or a tuple (vertices, faces) for 'surf'.
+            file: Output filename. If None, returns a GiftiImage object instead of writing a file.
+            gii_type: One of 'array', 'label', or 'surf'. Determines which save_* method is called.
+            colortable: Optional dict for label colors. Contains label to RGBA color mappings.
+        """
         self.array = array
         self.file = file
         self.colortable = colortable
         self.img = None
-        if gii_type == 'array':
+        if gii_type == "array":
             self.img = self.save_darray()
-        elif gii_type == 'label':
+        elif gii_type == "label":
             self.img = self.save_dlabel()
-        elif gii_type == 'surf':
+        elif gii_type == "surf":
             self.img = self.save_surf()
 
     def save_darray(self):
+        """
+        Create a GiftiImage from a float32 array and optionally save to file.
+
+        Returns:
+            A nibabel.gifti.GiftiImage object.
+        """
         agg_data = self.array.astype(np.float32)
         agg_data = nib.gifti.GiftiDataArray(agg_data)
         img = nib.gifti.GiftiImage(darrays=[agg_data])
@@ -71,8 +93,14 @@ class Save_Gii:
             img.to_filename(self.file)
 
         return img
-        
+
     def save_dlabel(self):
+        """
+        Create a label-type GiftiImage (int32) with an optional color table.
+
+        Returns:
+            A nibabel.gifti.GiftiImage object.
+        """
         agg_data = self.array.astype(np.int32)
         agg_data = nib.gifti.GiftiDataArray(
             data=agg_data,
@@ -109,8 +137,17 @@ class Save_Gii:
             img.to_filename(self.file)
 
         return img
-        
+
     def save_surf(self):
+        """
+        Create a surface-type GiftiImage from (vertices, faces).
+
+        Raises:
+            ValueError: If the input array is not a tuple of (vertices, faces).
+
+        Returns:
+            A nibabel.gifti.GiftiImage object.
+        """
         # 如果是表面数据，则array为元祖，第一个元素为顶点坐标，第二个元素为面索引
         try:
             vertices, faces = self.array
@@ -134,8 +171,21 @@ class Save_Gii:
         return img
 
     @staticmethod
-    def assign_colors(unique_labels, palette_name="bright", as_rgb_float=True, alpha=1.0):
+    def assign_colors(
+        unique_labels, palette_name="bright", as_rgb_float=True, alpha=1.0
+    ):
         """
+        Assign colors to label values. Requires seaborn.
+
+        Args:
+            unique_labels: An array of label values (integers).
+            palette_name: A seaborn color palette (e.g. 'husl', 'hls', 'bright').
+            as_rgb_float: Return RGB in [0, 1] if True, else in [0, 255].
+            alpha: Alpha (transparency) value for all labels.
+
+        Returns:
+            A dict mapping label value to an RGBA tuple.
+
         为有效标签分配颜色（支持超过20种颜色，需安装seaborn）
 
         参数：
@@ -166,13 +216,13 @@ class Save_Gii:
         # 创建映射字典
         label_to_color = dict(zip(valid_labels, colors))
         return label_to_color
-    
+
     def __repr__(self):
         if self.file is not None:
             return f"Save gifti file to {self.file}"
         else:
             return f"Gifti image object is created"
-    
+
 
 def load_cifti(img):
     """
