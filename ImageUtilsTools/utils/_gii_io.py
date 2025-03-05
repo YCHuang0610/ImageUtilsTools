@@ -1,6 +1,7 @@
 import numpy as np
 import gzip
 import nibabel as nib
+import seaborn as sns
 from nibabel.filebasedimages import ImageFileError
 
 
@@ -46,7 +47,132 @@ def save_gii(array, file=None):
         img.to_filename(file)
     else:
         return img
+    
 
+class Save_Gii:
+    def __init__(self, array, file=None, gii_type='array', colortable=None):
+        self.array = array
+        self.file = file
+        self.colortable = colortable
+        self.img = None
+        if gii_type == 'array':
+            self.img = self.save_darray()
+        elif gii_type == 'label':
+            self.img = self.save_dlabel()
+        elif gii_type == 'surf':
+            self.img = self.save_surf()
+
+    def save_darray(self):
+        agg_data = self.array.astype(np.float32)
+        agg_data = nib.gifti.GiftiDataArray(agg_data)
+        img = nib.gifti.GiftiImage(darrays=[agg_data])
+
+        if self.file is not None:
+            img.to_filename(self.file)
+
+        return img
+        
+    def save_dlabel(self):
+        agg_data = self.array.astype(np.int32)
+        agg_data = nib.gifti.GiftiDataArray(
+            data=agg_data,
+            intent="NIFTI_INTENT_LABEL",
+            datatype="NIFTI_TYPE_INT32",
+        )
+        gifti_label_table = nib.gifti.GiftiLabelTable()
+        unique_labels = np.unique(agg_data.data)
+
+        if self.colortable is not None:
+            label_colors = self.colortable
+        else:
+            label_colors = self.assign_colors(unique_labels)
+
+        for label in unique_labels:
+            if label <= 0:
+                continue
+            gifti_label = nib.gifti.GiftiLabel()
+            gifti_label.key = int(label)
+            gifti_label.label = f"Region_{label}"
+
+            # Add color to label
+            r, g, b, a = label_colors[label]
+            gifti_label.red = r
+            gifti_label.green = g
+            gifti_label.blue = b
+            gifti_label.alpha = a
+
+            gifti_label_table.labels.append(gifti_label)
+
+        img = nib.gifti.GiftiImage(darrays=[agg_data], labeltable=gifti_label_table)
+
+        if self.file is not None:
+            img.to_filename(self.file)
+
+        return img
+        
+    def save_surf(self):
+        # 如果是表面数据，则array为元祖，第一个元素为顶点坐标，第二个元素为面索引
+        try:
+            vertices, faces = self.array
+        except ValueError:
+            raise ValueError("Surface data must be a tuple of (vertices, faces)")
+        vertices = vertices.astype(np.float32)
+        faces = faces.astype(np.int32)
+        vertices = nib.gifti.GiftiDataArray(
+            data=vertices,
+            intent="NIFTI_INTENT_POINTSET",
+        )
+        faces = nib.gifti.GiftiDataArray(
+            data=faces,
+            intent="NIFTI_INTENT_TRIANGLE",
+        )
+        img = nib.gifti.GiftiImage(darrays=[vertices, faces])
+
+        if self.file is not None:
+            img.to_filename(self.file)
+
+        return img
+
+    @staticmethod
+    def assign_colors(unique_labels, palette_name="bright", as_rgb_float=True, alpha=1.0):
+        """
+        为有效标签分配颜色（支持超过20种颜色，需安装seaborn）
+
+        参数：
+            unique_labels : array-like
+                包含所有唯一标签的数组（通常为整数）
+            palette_name : str, 默认'husl'
+                seaborn支持的调色板名称，如'husl', 'hls', 'bright', 'dark'等
+            as_rgb_float : bool, 默认True
+                返回RGB值是否为0-1浮点数（Matplotlib兼容格式）
+
+        返回：
+            label_to_color : dict
+                标签到颜色的映射字典（无效标签<=0不会包含）
+        """
+        valid_labels = unique_labels[unique_labels > 0]
+        n = len(valid_labels)
+
+        # 生成颜色（使用seaborn的husl/hls等调色板）
+        colors = sns.color_palette(palette_name, n_colors=n)
+
+        # 转换为Matplotlib兼容的RGB浮点数组（若需要）
+        if not as_rgb_float:
+            colors = np.array(colors) * 255  # 转换为0-255整数格式
+
+        # 添加alpha通道转换为RGBA
+        colors = [(*rgb, alpha) for rgb in colors]
+
+        # 创建映射字典
+        label_to_color = dict(zip(valid_labels, colors))
+        return label_to_color
+    
+    def __repr__(self):
+        if self.file is not None:
+            return f"Save gifti file to {self.file}"
+        else:
+            return f"Gifti image object is created"
+    
 
 def load_cifti(img):
     """
@@ -116,6 +242,7 @@ def surf_data_from_cifti(data, axis, surf_name):
 
     Returns:
     numpy.ndarray: The extracted surface data corresponding to the specified surface name.
+    numpy.ndarray: The vertex indices for the extracted surface data.
 
     Raises:
     ValueError: If no structure with the specified surface name is found in the BrainModelAxis.
@@ -135,5 +262,5 @@ def surf_data_from_cifti(data, axis, surf_name):
                 (vtx_indices.max() + 1,) + data.shape[1:], dtype=data.dtype
             )
             surf_data[vtx_indices] = data
-            return surf_data
+            return surf_data, vtx_indices
     raise ValueError(f"No structure named {surf_name}")
