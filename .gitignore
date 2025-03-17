@@ -2,8 +2,12 @@
 ImageUtilsTools/GeneAnalysis/data/*
 !ImageUtilsTools/GeneAnalysis/data/sample_info_vertex_mapped.csv
 !ImageUtilsTools/GeneAnalysis/data/ahba_sampleInfo.csv
+!ImageUtilsTools/GeneAnalysis/data/L.D99_combined132_Cortex_final.32k_fs_LR.label.gii
+!ImageUtilsTools/GeneAnalysis/data/R.D99_combined132_Cortex_final.32k_fs_LR.label.gii
+
 *.txt
 *.pyc
+*.label.gii
 .DS_Store
 # pycache
 __pycache__/
