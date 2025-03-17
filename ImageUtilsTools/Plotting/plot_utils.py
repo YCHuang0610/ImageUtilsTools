@@ -175,6 +175,30 @@ def Plot_MySurf_VertexWise(
     return figure
 
 
+def Plot_MySurf_VertexWise_OneHemi(
+    single_data,
+    surf,
+    title=None,
+    hemi="left",
+    size=(500, 200),
+    **kwargs,
+):
+    array_single_hemi = np.array(single_data)
+    p = plot_base(
+        left_data=array_single_hemi if hemi == "left" else None,
+        right_data=array_single_hemi if hemi == "right" else None,
+        surf_lh=surf if hemi == "left" else None,
+        surf_rh=surf if hemi == "right" else None,
+        hemi=hemi,
+        size=size,
+        **kwargs,
+    )
+    figure = p.build()
+    if title is not None:
+        figure.axes[0].set_title(title)
+    return figure
+
+
 def Plot_MySurf_mni152Volume(
     img,
     two_side=True,  # 'two_side', 'one_side'
