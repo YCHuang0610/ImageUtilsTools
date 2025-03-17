@@ -88,8 +88,12 @@ class Save_Gii:
             A nibabel.gifti.GiftiImage object.
         """
         agg_data = self.array.astype(np.float32)
-        agg_data = list(nib.gifti.GiftiDataArray(data=data) for data in agg_data.T)
-        img = nib.gifti.GiftiImage(darrays=agg_data)
+        if agg_data.ndim == 1:
+            darrays = [nib.gifti.GiftiDataArray(data=agg_data)]
+        else:
+            darrays = list(nib.gifti.GiftiDataArray(data=data) for data in agg_data.T)
+        
+        img = nib.gifti.GiftiImage(darrays=darrays)
 
         if self.file is not None:
             img.to_filename(self.file)
