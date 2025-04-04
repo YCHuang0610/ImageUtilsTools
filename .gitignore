@@ -8,6 +8,8 @@ ImageUtilsTools/GeneAnalysis/data/*
 *.txt
 *.pyc
 *.label.gii
+!tutorial/parc/L.Schaefer2018_400Parcels_7Networks.32k_fs_LR.label.gii
+!tutorial/parc/R.Schaefer2018_400Parcels_7Networks.32k_fs_LR.label.gii
 .DS_Store
 # pycache
 __pycache__/
