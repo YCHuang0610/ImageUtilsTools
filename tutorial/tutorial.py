@@ -83,6 +83,24 @@ figure = Plot_Each_Region_Num(
 )
 
 # %%
+# Vertex wise data with Parcellation
+figure = Plot_MySurf_VertexWise(
+    lh_thick,
+    rh_thick,
+    lh,
+    rh,
+    cmap="inferno",
+    color_range=(1.5, 3.3),
+    layout="row",
+    size=(1000, 200),
+    title="Cortical Thickness",
+    outline_parc_lh=lh_parc,
+    outline_parc_rh=rh_parc,
+    outline_cmap="gray",
+    outline_alpha=0.5,
+)
+
+# %%
 import nibabel as nib
 from ImageUtilsTools.utils.parcellater import parcellate_surface_data
 from ImageUtilsTools.Plotting import Plot_MySurf_RegionWise
@@ -153,6 +171,21 @@ figure = Plot_MySurf_mni152Volume(
     layout="row",
     size=(1000, 200),
     brightness=0.7,
+)
+figure = Plot_MySurf_mni152Volume(
+    img,
+    cutoff=3,
+    two_side=False,
+    cmap="hot",
+    color_range=(3, 5),
+    cbar=True,
+    title="MSC05 Left > Right Hand Significant",
+    layout="row",
+    size=(1000, 200),
+    brightness=0.7,
+    outline_parc_lh=lh_parc,
+    outline_parc_rh=rh_parc,
+    outline_alpha=0.5,
 )
 # %%
 # 2. Correlation analysis and Spin Test

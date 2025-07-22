@@ -33,6 +33,10 @@ def plot_base(
     views=None,
     brightness=0.5,
     hemi="both",
+    outline_parc_lh=None,
+    outline_parc_rh=None,
+    outline_cmap="gray",
+    outline_alpha=1,
 ):
     if hemi == "both":
         p = Plot(
@@ -52,6 +56,16 @@ def plot_base(
             )
         else:
             p.add_layer({"left": left_data, "right": right_data}, cbar=cbar, cmap=cmap)
+
+        if outline_parc_lh is not None and outline_parc_rh is not None:
+            p.add_layer(
+                {"left": outline_parc_lh, "right": outline_parc_rh},
+                as_outline=True,
+                cbar=False,
+                cmap=outline_cmap,
+                alpha=outline_alpha,
+            )
+
     elif hemi == "left":
         p = Plot(
             surf_lh=surf_lh,
@@ -64,6 +78,16 @@ def plot_base(
             p.add_layer(left_data, cbar=cbar, cmap=cmap, color_range=color_range)
         else:
             p.add_layer(left_data, cbar=cbar, cmap=cmap)
+
+        if outline_parc_lh is not None:
+            p.add_layer(
+                {"left": outline_parc_lh,},
+                as_outline=True,
+                cbar=False,
+                cmap=outline_cmap,
+                alpha=outline_alpha,
+            )
+
     elif hemi == "right":
         p = Plot(
             surf_rh=surf_rh,
@@ -76,6 +100,15 @@ def plot_base(
             p.add_layer(right_data, cbar=cbar, cmap=cmap, color_range=color_range)
         else:
             p.add_layer(right_data, cbar=cbar, cmap=cmap)
+
+        if outline_parc_rh is not None:
+            p.add_layer(
+                {"left": outline_parc_rh,},
+                as_outline=True,
+                cbar=False,
+                cmap=outline_cmap,
+                alpha=outline_alpha,
+            )
     else:
         raise ValueError("hemi should be 'both', 'left' or 'right'")
     return p
