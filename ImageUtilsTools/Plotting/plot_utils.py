@@ -7,6 +7,7 @@ Functions for surface plotting are mainly depend on the surfplot package.
 """
 
 import os
+import subprocess
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -402,3 +403,24 @@ def Plot_Each_Region_Num(
     if title is not None:
         figure.axes[0].set_title(title)
     return figure
+
+
+# xvfb warper
+xvfb_process = None # global variable to hold the Xvfb process
+def start_xvfb():
+    global xvfb_process
+    # 设置 DISPLAY 环境变量
+    os.environ["DISPLAY"] = ":99.0"
+    # 启动 xvfb
+    xvfb_process = subprocess.Popen(
+        ["Xvfb", ":99", "-screen", "0", "1024x768x24"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+def stop_xvfb():
+    global xvfb_process
+    if xvfb_process is not None:
+        xvfb_process.terminate()  # 终止子进程
+        xvfb_process.wait()       # 等待子进程完全退出
+        xvfb_process = None
