@@ -52,7 +52,7 @@ class TransImgPLS:
     Args:
         gene_expression (ndarray): The gene expression data.
         imaging_data (ndarray): The imaging data.
-        gene_label (list): The labels for the genes.
+        gene_label (ndarray): The labels for the genes.
         n_components (int, optional): The number of components to extract. Defaults to 2.
         spin_test_method (str, optional): The spin test method. Defaults to None.
         parcellationLR (str, optional): The parcellationLR parameter. Required if spin_test_method is not None. Defaults to None.
@@ -69,7 +69,7 @@ class TransImgPLS:
         Y (ndarray): The z-scored imaging data.
         X (ndarray): The z-scored gene expression data.
         n_regions (int): The number of regions in the gene expression data.
-        gene_labels (list): The labels for the genes.
+        gene_labels (list or ndarray): The labels for the genes.
         XS (ndarray): The scores of the extracted components.
         stats_W (ndarray): The weights of the extracted components.
         x1 (ndarray): The indices of the sorted weights for the first component.
@@ -121,7 +121,7 @@ class TransImgPLS:
         self.Y = zscore(self.Y, axis=0, ddof=1)
         self.X = zscore(gene_expression, axis=0, ddof=1)
         self.n_regions = self.X.shape[0]
-        self.gene_labels = gene_label
+        self.gene_labels = np.array(gene_label)
 
         # run the first PLS regression
         res = pls_regression(
