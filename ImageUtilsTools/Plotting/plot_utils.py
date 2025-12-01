@@ -38,6 +38,7 @@ def plot_base(
     outline_parc_rh=None,
     outline_cmap="gray",
     outline_alpha=1,
+    mirror_views=True,
 ):
     if hemi == "both":
         p = Plot(
@@ -47,6 +48,7 @@ def plot_base(
             layout=layout,
             views=views,
             brightness=brightness,
+            mirror_views=mirror_views,
         )
         if color_range is not None:
             p.add_layer(
