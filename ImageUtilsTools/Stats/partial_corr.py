@@ -74,6 +74,58 @@ def pairPartial_corr(C, names, covas, standard=True):
 
     return R_corr, P_value
 
+def pairPartial_corr_matrix(C, names, covas, standard=True):
+    """
+    (Matlab's partialcorr(X, Z) function)
+    Returns the sample linear partial correlation coefficients between pairs of variables of names in C,
+    controlling for the variables of covas in C.
+    """
+    # 使用 DataFrame 到 numpy 的零拷贝/少拷贝转换
+    try:
+        C_names = C[names].to_numpy(dtype=float, copy=False)
+        C_covas = C[covas].to_numpy(dtype=float, copy=False)
+    except AttributeError:
+        # 兼容传入已是 ndarray 的情况
+        C_names = np.asarray(C[names], dtype=float)
+        C_covas = np.asarray(C[covas], dtype=float)
+
+    if standard:
+        C_names = standardization(C_names)
+        C_covas = standardization(C_covas)
+
+    n, p = C_names.shape
+    k = C_covas.shape[1]
+
+    # 一次性多响应最小二乘：C_covas * B = C_names
+    # B 形状 (k, p)
+    B, _, _, _ = linalg.lstsq(C_covas, C_names)
+    # 残差矩阵 (n, p)
+    resid = C_names - C_covas.dot(B)
+
+    # 向量化相关矩阵
+    # 防止全零列导致除零，先做标准差裁剪
+    resid_std = resid.std(axis=0, ddof=1)
+    safe_std = np.where(resid_std == 0, 1.0, resid_std)
+    resid_z = (resid - resid.mean(axis=0)) / safe_std
+    R_corr = np.corrcoef(resid_z, rowvar=False)
+    np.fill_diagonal(R_corr, 1.0)
+    R_corr = np.clip(R_corr, -1.0, 1.0)
+
+    # p 值（部分相关的自由度 df = n - k - 2）
+    df = n - k - 2
+    if df <= 0:
+        # 样本太少时无法给出有效 p 值
+        P_value = np.full((p, p), np.nan, dtype=float)
+        np.fill_diagonal(P_value, 0.0)
+        return R_corr, P_value
+
+    r = np.clip(R_corr, -0.9999999, 0.9999999)
+    t_stat = r * np.sqrt(df / (1.0 - r * r))
+    # 双侧检验
+    P_value = 2.0 * stats.t.sf(np.abs(t_stat), df)
+    np.fill_diagonal(P_value, 0.0)
+
+    return R_corr, P_value
 
 def ppcor(data):
     """
