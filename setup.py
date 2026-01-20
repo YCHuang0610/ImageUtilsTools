@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ImageUtilsTools",
-    version="0.1.0",
+    version="0.2.0",
     description="...",
     author="Yichun Huang",
     author_email="ychunhuang@foxmail.com",
@@ -24,7 +24,7 @@ setup(
         "statsmodels",
         "seaborn",
     ],
-    python_requires=">=3.6,<3.12",
+    python_requires=">=3.6,<=3.12",
     keywords=["statical analysis", "neuroimaging"],
     license="GPLv3",
     classifiers=[
