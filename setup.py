@@ -24,7 +24,7 @@ setup(
         "statsmodels",
         "seaborn",
     ],
-    python_requires=">=3.6,<=3.12",
+    python_requires=">=3.6,<3.13",
     keywords=["statical analysis", "neuroimaging"],
     license="GPLv3",
     classifiers=[
