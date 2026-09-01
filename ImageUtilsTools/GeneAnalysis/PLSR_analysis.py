@@ -291,7 +291,8 @@ class TransImgPLS:
                     )
                     pct_var = np.cumsum(res_perm["varexp"], axis=0)
                     Rsq[j] = pct_var[i]
-                p[i] = np.sum(Rsq >= Rsquared) / self.perm
+                extreme = np.sum(Rsq >= Rsquared)
+                p[i] = (extreme + 1) / (self.perm + 1)
                 print("p-value for {} components: {:.4f}".format(i + 1, p[i]))
         else:
             p = np.zeros(dim)
@@ -322,7 +323,8 @@ class TransImgPLS:
                     )
                     pct_var = np.cumsum(res_perm["varexp"], axis=0)
                     Rsq[j] = pct_var[i]
-                p[i] = np.sum(Rsq >= Rsquared) / self.perm
+                extreme = np.sum(Rsq >= Rsquared)
+                p[i] = (extreme + 1) / (self.perm + 1)
                 print("p-value for {} components: {:.4f}".format(i + 1, p[i]))
         # 绘图
         if plot:
@@ -394,31 +396,31 @@ class TransImgPLS:
         ind1 = np.argsort(temp_w1)[::-1]
         PLS1_gene_list = self.PLS1_gene_labels[ind1]
         # Calculate P value
-        P_val = norm.sf(np.abs(Z1))  # one-sided p-value
-        _, P_adj, _, _ = multipletests(P_val, method="fdr_bh")
+        PLS1_P_val = 2 * norm.sf(np.abs(Z1))
+        _, PLS1_P_adj, _, _ = multipletests(PLS1_P_val, method="fdr_bh")
         # PC2
         Z2 = np.sort(temp_w2)[::-1]
         ind2 = np.argsort(temp_w2)[::-1]
         PLS2_gene_list = self.PLS2_gene_labels[ind2]
         # Calculate P value
-        P_val = norm.sf(np.abs(Z2))
-        _, P_adj, _, _ = multipletests(P_val, method="fdr_bh")
+        PLS2_P_val = 2 * norm.sf(np.abs(Z2))
+        _, PLS2_P_adj, _, _ = multipletests(PLS2_P_val, method="fdr_bh")
 
         # write to dataframe
         df_PLS1 = pd.DataFrame(
             {
                 "Gene": PLS1_gene_list,
                 "Z-score": Z1,
-                "P-value": P_val,
-                "P-adjusted": P_adj,
+                "P-value": PLS1_P_val,
+                "P-adjusted": PLS1_P_adj,
             }
         )
         df_PLS2 = pd.DataFrame(
             {
                 "Gene": PLS2_gene_list,
                 "Z-score": Z2,
-                "P-value": P_val,
-                "P-adjusted": P_adj,
+                "P-value": PLS2_P_val,
+                "P-adjusted": PLS2_P_adj,
             }
         )
         return df_PLS1, df_PLS2
