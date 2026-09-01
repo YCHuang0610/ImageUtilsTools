@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ImageUtilsTools",
-    version="0.2.0",
+    version="0.2.1",
     description="...",
     author="Yichun Huang",
     author_email="ychunhuang@foxmail.com",
